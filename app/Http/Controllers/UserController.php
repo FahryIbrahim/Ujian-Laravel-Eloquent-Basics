@@ -15,30 +15,36 @@ class UserController extends Controller
         //   order by created_at desc
         //   limit 3
 
-        $users = User::all()
-                    ->whereNotNull('email_verified_at')
-                    ->orderBy('created_at')
-                    ->limit('3')
-                    ->get(); // replace this with Eloquent statement
+        $users = User::all()->where('email_verified_at', '!=', null)->sortByDesc('created_at')->take(3);
 
         return view('users.index', compact('users'));
     }
 
     public function show($userId)
     {
-        $user = User::findOrFail($userId); // TASK: find user by $userId or show "404 not found" page
+      ///  $userId = Null;  // TASK: find user by $userId or show "404 not found" page
+      
+      // find user by $userId or show "404 not found" page
 
-        return view('users.show', compact('user'));
+        $user = User::findOrfail($userId);
+
+        
+
+
+
+       return view('users.show', compact('user'));
     }
 
     public function check_create($name, $email)
     {
         // TASK: find a user by $name and $email
         //   if not found, create a user with $name, $email and random password
-        $user = User::create([
+        $user = NULL;
+
+        $user = User::firstOrCreate([
             'name' => $name,
             'email' => $email,
-            'password' => bcrypt(str_random(8)),
+            'password' => 'random',
         ]);
 
         return view('users.show', compact('user'));
@@ -48,12 +54,14 @@ class UserController extends Controller
     {
         // TASK: find a user by $name and update it with $email
         //   if not found, create a user with $name, $email and random password
-        $user = updateOrCreate([
+        $user = NULL; // updated or created user
+
+        $user = User::updateOrCreate([
             'name' => $name,
         ],[
             'email' => $email,
-            'password' => bcrypt(str_random(8)),
-        ]); // updated or created user
+            'password' => 'random',
+        ]);
 
         return view('users.show', compact('user'));
     }
@@ -65,7 +73,11 @@ class UserController extends Controller
         // $request->users is an array of IDs, ex. [1, 2, 3]
 
         // Insert Eloquent statement here
+
         User::destroy($request->users);
+
+        
+
         return redirect('/')->with('success', 'Users deleted');
     }
 
